@@ -3,6 +3,8 @@ set -euo pipefail
 
 BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_NAME="闪念同步"
+APP_VERSION="${APP_VERSION:-0.1.0}"
+APP_BUILD="${APP_BUILD:-1}"
 APP_DIR="$BASE_DIR/dist/$APP_NAME.app"
 CONTENTS="$APP_DIR/Contents"
 MACOS="$CONTENTS/MacOS"
@@ -38,7 +40,7 @@ if [[ -f "$BASE_DIR/AppIcon/AppIcon.icns" ]]; then
   cp "$BASE_DIR/AppIcon/AppIcon.icns" "$RESOURCES/"
 fi
 
-cat > "$CONTENTS/Info.plist" <<'EOF'
+cat > "$CONTENTS/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
@@ -50,8 +52,8 @@ cat > "$CONTENTS/Info.plist" <<'EOF'
   <key>CFBundleName</key><string>闪念同步</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>0.1.0</string>
-  <key>CFBundleVersion</key><string>1</string>
+  <key>CFBundleShortVersionString</key><string>$APP_VERSION</string>
+  <key>CFBundleVersion</key><string>$APP_BUILD</string>
   <key>NSHumanReadableCopyright</key><string>© 2026 江sir爱数码 · MIT License</string>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSUIElement</key><true/>

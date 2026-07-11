@@ -59,7 +59,15 @@ enum NativeSync {
         for note in fetched.notes where !note.id.isEmpty {
             if noteDayKey(note) == today { append(note.id, to: &day.discoveredIds) }
             if isMarked(note.title, prefix: config["IDEASHELL_TRANSFERRED_PREFIX"] ?? "～～") {
-                posted.insert(note.id); marked.insert(note.id); append(note.id, to: &day.postedIds)
+                posted.insert(note.id); marked.insert(note.id)
+                if statisticsDayKey(note, fallback: today) == today {
+                    append(note.id, to: &day.postedIds)
+                } else {
+                    let key = statisticsDayKey(note, fallback: today)
+                    var sourceDay = state.dailyStats[key] ?? DayStats()
+                    append(note.id, to: &sourceDay.postedIds)
+                    state.dailyStats[key] = sourceDay
+                }
                 state.pendingNotes.removeValue(forKey: note.id); removeFailure(note.id, state: &state)
             }
         }
@@ -86,22 +94,30 @@ enum NativeSync {
             result.todayPending = state.pendingNotes.keys.filter { day.discoveredIds.contains($0) }.count
             return result
         }
+        // All four daily metrics describe the same cohort: the calendar day on
+        // which a note was created in ideaShell. A note that finishes
+        // transcription tomorrow therefore moves from pending to posted in
+        // yesterday's bucket instead of inflating tomorrow's posted count.
+        state.dailyStats[today] = day
         persist(state, to: stateURL)
         for (note, text) in ready {
+            let sourceDayKey = statisticsDayKey(note, fallback: today)
+            var sourceDay = state.dailyStats[sourceDayKey] ?? DayStats()
             do { try postToTana(text: text, token: tanaToken, target: config["TANA_TARGET_NODE_ID"] ?? "INBOX") }
-            catch { append(note.id, to: &day.failedIds); state.dailyStats[today] = day; persist(state, to: stateURL); throw error }
-            posted.insert(note.id); append(note.id, to: &day.postedIds); state.pendingNotes.removeValue(forKey: note.id); removeFailure(note.id, state: &state)
-            state.postedIds = posted.sorted(); state.syncedIds = state.postedIds; state.dailyStats[today] = day; persist(state, to: stateURL); result.postedNotes += 1
+            catch { append(note.id, to: &sourceDay.failedIds); state.dailyStats[sourceDayKey] = sourceDay; persist(state, to: stateURL); throw error }
+            posted.insert(note.id); append(note.id, to: &sourceDay.postedIds); state.pendingNotes.removeValue(forKey: note.id); removeFailure(note.id, state: &state)
+            state.postedIds = posted.sorted(); state.syncedIds = state.postedIds; state.dailyStats[sourceDayKey] = sourceDay; persist(state, to: stateURL); result.postedNotes += 1
         }
         let needsMark = config["IDEASHELL_MARK_TRANSFERRED"] == "0" ? [] : fetched.notes.filter { posted.contains($0.id) && !marked.contains($0.id) && !isMarked($0.title, prefix: config["IDEASHELL_TRANSFERRED_PREFIX"] ?? "～～") }
         for note in needsMark {
             do { try markNote(note, token: ideaToken, prefix: config["IDEASHELL_TRANSFERRED_PREFIX"] ?? "～～"); marked.insert(note.id); result.markedNotes += 1 }
             catch { result.warnings.append("\(note.id): \(error.localizedDescription)") }
         }
-        state.postedIds = posted.sorted(); state.syncedIds = state.postedIds; state.markedIds = marked.sorted(); state.dailyStats[today] = day
+        state.postedIds = posted.sorted(); state.syncedIds = state.postedIds; state.markedIds = marked.sorted()
         state.backfillComplete = true; state.lastScanAt = runStartedAt; persist(state, to: stateURL)
-        result.pendingNotes = state.pendingNotes.count; result.todayNew = Set(day.discoveredIds).count; result.todayPosted = Set(day.postedIds).count
-        result.todayPending = state.pendingNotes.keys.filter { day.discoveredIds.contains($0) }.count; result.todayFailed = Set(day.failedIds).count
+        let finalDay = state.dailyStats[today] ?? DayStats()
+        result.pendingNotes = state.pendingNotes.count; result.todayNew = Set(finalDay.discoveredIds).count; result.todayPosted = Set(finalDay.postedIds).count
+        result.todayPending = state.pendingNotes.keys.filter { finalDay.discoveredIds.contains($0) }.count; result.todayFailed = Set(finalDay.failedIds).count
         return result
     }
 
@@ -218,6 +234,11 @@ enum NativeSync {
     private static func isMarked(_ title: String, prefix: String) -> Bool { title.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix(prefix) }
     private static func dayKey(_ date: Date) -> String { let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.dateFormat = "yyyy-MM-dd"; return f.string(from: date) }
     private static func noteDayKey(_ note: Note) -> String { String(note.createdAt.prefix(10)) }
+    private static func statisticsDayKey(_ note: Note, fallback: String) -> String {
+        let key = noteDayKey(note)
+        guard key.range(of: #"^\d{4}-\d{2}-\d{2}$"#, options: .regularExpression) != nil else { return fallback }
+        return key
+    }
     private static func append(_ id: String, to array: inout [String]) { if !array.contains(id) { array.append(id) } }
     private static func removeFailure(_ id: String, state: inout State) { for key in state.dailyStats.keys { state.dailyStats[key]?.failedIds.removeAll { $0 == id } } }
     private static func loadState(_ url: URL) -> State { guard let data = try? Data(contentsOf: url), let value = try? JSONDecoder().decode(State.self, from: data) else { return State() }; return value }
