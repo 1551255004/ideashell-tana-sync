@@ -1,0 +1,23 @@
+.env
+.ideashell-tana-state.json
+.ideashell-tana-status.json
+.sync.lock/
+logs/
+*.log
+.DS_Store
+node_modules/
+dist/
+tmp/
+AppIcon/AppIcon-1024.png
+AppIcon/AppIcon.icns
+AppIcon/AppIcon.iconset/
+AppIcon/Candidates/
+StatusIcon/Candidates/
+# Replaced by the native Swift runtime; retained locally only as migration history.
+sync-ideashell-to-tana.mjs
+run-sync.sh
+install-launchd.sh
+sample-ideashell-notes.json
+tests/
+AGENTS.md
+PROJECT_CONTEXT.md
