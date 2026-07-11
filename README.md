@@ -1,5 +1,7 @@
 # ideaShell to Tana Sync
 
+中文 | [English](README.en.md)
+
 将闪念贝壳（ideaShell）的新笔记定时同步到 Tana 指定节点的 macOS 本地工具。
 
 中文名称为“闪念同步”，英文系统及英文界面下显示为 **IdeaSync**。
