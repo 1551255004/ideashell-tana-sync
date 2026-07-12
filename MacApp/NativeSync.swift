@@ -251,7 +251,37 @@ enum NativeSync {
     private static func parseRecent(_ text: String) -> [Note] { let p = "(?m)^# (.+?) @ ([^\\n]+)\\nnote_id:\\s*([^\\s]+)"; guard let regex = try? NSRegularExpression(pattern: p) else { return [] }; let ns = text as NSString; return regex.matches(in: text, range: NSRange(location: 0, length: ns.length)).map { Note(id: ns.substring(with: $0.range(at: 3)), title: ns.substring(with: $0.range(at: 1)).trimmingCharacters(in: .whitespaces), createdAt: ns.substring(with: $0.range(at: 2)).trimmingCharacters(in: .whitespaces), summary: "", content: "") } }
     private static func parseDetail(_ text: String, _ fallback: Note) -> Note { func field(_ pattern: String) -> String? { guard let r = try? NSRegularExpression(pattern: pattern, options: [.anchorsMatchLines]), let m = r.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)), let range = Range(m.range(at: 1), in: text) else { return nil }; return String(text[range]).trimmingCharacters(in: .whitespaces) }; return Note(id: fallback.id, title: field("^#\\s+(.+)$") ?? fallback.title, createdAt: field("^time:\\s*(.+)$") ?? fallback.createdAt, summary: field("^summary:\\s*(.+)$") ?? "", content: text) }
     private static func noteText(_ note: Note) -> String { stripTags(extractText(note).isEmpty ? (note.summary.isEmpty ? note.title : note.summary) : extractText(note)) }
-    private static func extractText(_ note: Note) -> String { let raw = note.content; guard let range = raw.range(of: "## Memos") else { return cleanMetadata(raw) }; let chunks = raw[range.upperBound...].components(separatedBy: "**Memo ").dropFirst(); let bodies = chunks.map { $0.components(separatedBy: "\n").filter { !$0.hasPrefix("summary:") && !$0.hasPrefix("**") }.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }; return bodies.isEmpty ? cleanMetadata(raw) : bodies.joined(separator: "\n\n") }
+    private static func extractText(_ note: Note) -> String { extractOriginalText(note.content) }
+    static func extractOriginalText(_ raw: String) -> String {
+        guard let range = raw.range(of: "## Memos") else { return cleanMetadata(raw) }
+        let memoSection = String(raw[range.upperBound...])
+        let headerPattern = #"^\*\*Memo\s+\d+:[^\n]*\*\*\s*$"#
+        let headerRegex = try? NSRegularExpression(pattern: headerPattern)
+        var bodies: [String] = []
+        var currentLines: [String] = []
+
+        func isMemoHeader(_ line: String) -> Bool {
+            let range = NSRange(line.startIndex..., in: line)
+            return headerRegex?.firstMatch(in: line, range: range) != nil
+        }
+
+        func appendCurrentBody() {
+            let body = currentLines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            if !body.isEmpty { bodies.append(body) }
+            currentLines.removeAll(keepingCapacity: true)
+        }
+
+        for rawLine in memoSection.components(separatedBy: .newlines) {
+            let line = rawLine.trimmingCharacters(in: .whitespaces)
+            if isMemoHeader(line) {
+                appendCurrentBody()
+            } else if !line.hasPrefix("summary:") {
+                currentLines.append(line)
+            }
+        }
+        appendCurrentBody()
+        return bodies.isEmpty ? cleanMetadata(raw) : bodies.joined(separator: "\n\n")
+    }
     private static func cleanMetadata(_ text: String) -> String { text.components(separatedBy: .newlines).map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty && !$0.hasPrefix("# ") && !$0.hasPrefix("note_id:") && !$0.hasPrefix("time:") && !$0.hasPrefix("summary:") && $0 != "转写中..." && $0 != "## Memos" }.joined(separator: "\n") }
     private static func stripTags(_ text: String) -> String { guard let regex = try? NSRegularExpression(pattern: "(?:\\s|^)(?:#[\\p{Han}\\p{L}\\p{N}_-]+)(?:\\s+#[\\p{Han}\\p{L}\\p{N}_-]+)*\\s*$") else { return text.trimmingCharacters(in: .whitespacesAndNewlines) }; return regex.stringByReplacingMatches(in: text, range: NSRange(text.startIndex..., in: text), withTemplate: "").trimmingCharacters(in: .whitespacesAndNewlines) }
     private static func noteReadiness(_ note: Note) -> Bool { let title = note.title.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(); let body = extractText(note).trimmingCharacters(in: .whitespacesAndNewlines); return !["", "(untitled)", "untitled", "无标题", "转写中...", "转写中…"].contains(title) && !body.isEmpty && body != "转写中..." && body != "转写中…" }
