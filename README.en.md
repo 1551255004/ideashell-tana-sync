@@ -33,7 +33,7 @@ Node.js is **not** required.
 
 ## Download and install
 
-Download the latest test build from the [GitHub Releases page](https://github.com/1551255004/ideashell-tana-sync/releases).
+Download the latest test build from the [GitHub Releases page](https://github.com/jiangsir-tech/ideashell-tana-sync/releases).
 
 1. Open the downloaded DMG.
 2. Drag **IdeaSync** into **Applications**.

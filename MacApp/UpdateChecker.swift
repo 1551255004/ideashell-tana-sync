@@ -55,10 +55,10 @@ final class UpdateChecker: ObservableObject {
     let currentBuild: Int
 
     private static let manifestURL = URL(
-        string: "https://raw.githubusercontent.com/1551255004/ideashell-tana-sync/main/update.json"
+        string: "https://raw.githubusercontent.com/jiangsir-tech/ideashell-tana-sync/main/update.json"
     )!
     private static let releasesURL = URL(
-        string: "https://api.github.com/repos/1551255004/ideashell-tana-sync/releases?per_page=10"
+        string: "https://api.github.com/repos/jiangsir-tech/ideashell-tana-sync/releases?per_page=10"
     )!
 
     init(bundle: Bundle = .main) {
