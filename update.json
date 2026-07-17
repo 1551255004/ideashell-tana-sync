@@ -5,5 +5,5 @@
     "zh-Hans": "新增检查更新与反馈入口，并修复失败统计和 Tana 换行写入问题。",
     "en": "Added update checks and feedback, and fixed stale failure counts and Tana writes with line breaks."
   },
-  "downloadURL": "https://github.com/1551255004/ideashell-tana-sync/releases/tag/v0.1.0-beta.5"
+  "downloadURL": "https://github.com/jiangsir-tech/ideashell-tana-sync/releases/tag/v0.1.0-beta.5"
 }
