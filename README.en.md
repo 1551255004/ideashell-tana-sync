@@ -1,100 +1,72 @@
-# ideaShell to Tana Sync
+# IdeaSync
 
-[中文](README.md) | English
+[中文](README.md)
 
-**IdeaSync** (Chinese name: 闪念同步) is a local macOS menu bar app that syncs new notes from ideaShell to a chosen Tana node.
+**IdeaSync** (闪念同步) automatically sends new notes from ideaShell to a Tana node you choose.
 
-It is designed for people who use both ideaShell and Tana. Connect your accounts, select a destination in Tana, optionally polish notes with AI, sync on demand, or enable automatic syncing—without editing `.env` files or using Terminal.
+It is a native macOS menu-bar app: no Node.js, no Terminal, and no relay server. After you enter your own credentials, everything runs locally on your Mac.
 
-Your credentials, sync state, and logs stay on your Mac. This project does not upload note content or run a relay server.
+[Download the latest stable release](https://github.com/jiangsir-tech/ideashell-tana-sync/releases/latest) · macOS 14+ · Apple-signed and notarized · Universal for Apple Silicon and Intel
 
-## Features
+![IdeaSync menu-bar panel showing daily status, manual or automatic sync, and quick actions](docs/images/menu-bar-overview.png)
 
-- Reads recent new notes through the ideaShell MCP API.
-- Sends only the note detail text to Tana, not the ideaShell title.
-- Optionally polishes text with OpenAI, DeepSeek, OpenRouter, other OpenAI-compatible APIs, Anthropic Claude, Google Gemini, or Ollama.
-- Removes trailing `#tags` from the note body.
-- Records synced note IDs locally to prevent duplicate imports.
-- Waits until a transcription is complete and stable across two scans, avoiding `(untitled)` or partial notes.
-- Shows today's discovered, synced, pending, and failed notes in the menu bar.
-- Includes a local sync-history window with all-time, monthly, and recent-30-day trends. Daily counts are kept for up to 365 days; note content is never stored in this history.
-- Supports system language, Simplified Chinese, and English, with instant switching.
-- After Tana confirms a write, prefixes the source ideaShell title with `～～`.
-- Supports manual sync, or automatic sync every 5, 10, 15, 30, or 60 minutes, as well as once daily at a chosen time.
+## What it does
 
-## Requirements
+- **Syncs notes into Tana automatically:** sync manually, on a 5, 10, 15, 30, or 60-minute schedule, or once each day.
+- **Avoids partial and duplicate imports:** waits for transcriptions and note text to settle, then records synced items locally.
+- **Keeps the source state clear:** adds the `～～` marker to the original ideaShell note only after Tana confirms the write.
+- **Optional AI polishing:** supports OpenAI, DeepSeek, OpenRouter, Anthropic Claude, Google Gemini, Ollama, and other OpenAI-compatible endpoints.
+- **Shows useful history:** view all-time, monthly, and 30-day discovered-versus-synced trends. History stores counts only, never note content.
+- **Chinese and English UI:** follows macOS or switches language instantly in Settings.
+
+![Sync history showing all-time, monthly, and recent 30-day trends](docs/images/sync-history.png)
+
+## Install in three steps
+
+1. Download `IdeaSync-*.dmg` from the [Releases page](https://github.com/jiangsir-tech/ideashell-tana-sync/releases/latest).
+2. Open the DMG and drag **IdeaSync** to **Applications**.
+3. Open it from the menu bar, choose **Settings**, and enter your ideaShell API key, Tana Write API token, and destination node ID.
+
+The stable release is Apple-signed and notarized, so it opens normally. Use `INBOX` as the destination node ID to write to your Tana Inbox.
+
+## What you need
 
 - macOS 14 or later
-- An ideaShell API key for MCP
-- A Tana Write API token and destination node ID
-- Optional: an API key for an AI provider
+- An ideaShell MCP API key
+- A Tana Write API token
+- A Tana destination node ID (or `INBOX`)
+- Optional: an AI provider API key for polishing notes before sync
 
-Node.js is **not** required.
+## How syncing works
 
-## Download and install
-
-Download the latest test build from the [GitHub Releases page](https://github.com/jiangsir-tech/ideashell-tana-sync/releases).
-
-1. Open the downloaded DMG.
-2. Drag **IdeaSync** into **Applications**.
-3. Open the app from Applications. Early test builds are unsigned: Control-click the app and choose **Open**, or use **Open Anyway** in **System Settings → Privacy & Security**.
-4. Open IdeaSync from the menu bar and choose **Settings**.
-5. Enter your ideaShell API key, Tana Write API token, and destination node ID. Use `INBOX` to send notes to the Tana Inbox.
-
-The current test app is universal and supports both Apple Silicon and Intel Macs.
-
-## Configuration
-
-The app saves configuration automatically after a short pause while you type. The polish prompt has its own **Save Prompt** button. Required credentials must be valid before the app replaces an existing usable configuration.
-
-Choose an AI provider in Settings to enable polishing. Presets are available for OpenAI, DeepSeek, OpenRouter, Anthropic, Gemini, and Ollama. You can also use any OpenAI-compatible endpoint. The **Test AI Connection** action does not read your real ideaShell notes or write to Tana.
-
-The default prompt uses `{{text}}` as the original-note placeholder. You can edit it, save it locally, or restore the default. Your custom prompt is preserved when the app is upgraded.
-
-Local files are stored here:
-
-- Configuration and sync state: `~/Library/Application Support/ideashell-tana-sync/`
-- Logs: `~/Library/Logs/ideashell-tana-sync/`
-
-## First sync and automatic sync
-
-After entering credentials, choose **Sync Now** from the menu bar. New notes are held until their title and content are unchanged for two scans and have been stable for at least four minutes. Seeing a pending note during the first sync is expected.
-
-Enable automatic sync in **Settings**, then choose an interval or a daily time. Your Mac must be on and you must be signed in, but ideaShell, Tana, and Terminal do not need to be open. New voice notes may take 5–10 minutes to reach Tana while transcription completes.
-
-## Publishing updates
-
-The About window includes **Check for Updates**. It reads `update.json` from the repository root, compares the monotonically increasing build number, shows release notes, and opens the corresponding GitHub Release download page when an update is available.
-
-For beta releases, the trailing beta number is used as the build number automatically:
-
-```bash
-./build-dmg.sh 0.1.0-beta.5
+```text
+New ideaShell note → wait for stable content → write succeeds in Tana → mark the source note
 ```
 
-For a stable release or a custom build, provide an integer greater than every previously published build:
+New notes pass two stability checks and wait for at least four minutes. A pending item normally means a voice transcription or its text is still settling. New voice notes usually arrive in Tana within 5–10 minutes.
 
-```bash
-APP_BUILD=6 ./build-dmg.sh 0.1.0
-```
-
-Create the GitHub Release and confirm that its DMG can be downloaded before updating and pushing `update.json`. This prevents users from seeing an update that is not available yet.
-
-To inspect the background job:
-
-```bash
-launchctl print gui/$(id -u)/com.ideashell-tana-sync
-```
+For automatic sync, your Mac only needs to be on and signed in. ideaShell, Tana, and Terminal do not need to stay open.
 
 ## Privacy and security
 
-- Never commit `.env`, `.ideashell-tana-state.json`, or `logs/`.
-- API keys are stored in a local user-only configuration file with `600` permissions, outside the project folder and ignored by Git.
-- When AI polishing is enabled, note text is sent to the AI endpoint you configure.
+- Credentials, sync state, and logs stay on your Mac at `~/Library/Application Support/ideashell-tana-sync/`.
+- There is no cloud account, database, or relay server.
+- When AI polishing is enabled, note text is sent directly to the AI provider you configured. It is not sent when polishing is off.
+- Sync history stores dates and counts, never note content.
 
-## Feedback
+## FAQ
 
-Choose **Feedback** in the app's About window, or open the [feedback form](https://tally.so/r/2EyvKg). Remove API keys, tokens, note text, and other private information before submitting.
+**Do I need Node.js?**
+
+No. The sync engine is built into the app.
+
+**How do I update?**
+
+Choose **Check for Updates** from the About window. If an update is available, IdeaSync opens its GitHub Release page.
+
+**Where can I send feedback?**
+
+Choose **Feedback** in the About window, or use the [feedback form](https://tally.so/r/2EyvKg). Please remove API keys, tokens, and note text before sending a report.
 
 ## License
 
