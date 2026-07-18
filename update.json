@@ -1,9 +1,9 @@
 {
-  "version": "0.1.0-beta.6",
-  "build": 6,
+  "version": "0.1.0",
+  "build": 7,
   "releaseNotes": {
-    "zh-Hans": "首个已完成 Apple 签名与公证的测试版，可直接安装，无需绕过“未识别开发者”提示。",
-    "en": "First beta signed and notarized by Apple. Install directly without bypassing the unidentified-developer warning."
+    "zh-Hans": "闪念同步首个正式版：已完成 Apple 签名与公证，支持直接安装，并提供图形化设置、定时同步、同步历史和更新提醒。",
+    "en": "The first stable release of IdeaSync: Apple-signed and notarized, with graphical setup, scheduled sync, sync history, and update checks."
   },
-  "downloadURL": "https://github.com/jiangsir-tech/ideashell-tana-sync/releases/tag/v0.1.0-beta.6"
+  "downloadURL": "https://github.com/jiangsir-tech/ideashell-tana-sync/releases/tag/v0.1.0"
 }
