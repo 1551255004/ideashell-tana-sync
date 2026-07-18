@@ -362,7 +362,7 @@ private struct AboutView: View {
                 Text("闪念同步")
                     .font(.title2)
                     .fontWeight(.semibold)
-                Text(appFormat("版本 %@（构建 %d）", updateChecker.currentVersion, updateChecker.currentBuild))
+                Text(appFormat("版本 %@", updateChecker.currentVersion))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

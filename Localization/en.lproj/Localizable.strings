@@ -20,7 +20,7 @@
 "设置" = "Settings";
 "关于" = "About";
 "关于闪念同步" = "About IdeaSync";
-"版本 %@（构建 %d）" = "Version %@ (Build %d)";
+"版本 %@" = "Version %@";
 "将闪念贝壳笔记同步至 Tana" = "Sync ideaShell notes to Tana";
 "作者：江sir爱数码" = "Author: 江sir爱数码";
 "正在检查更新…" = "Checking for Updates…";
