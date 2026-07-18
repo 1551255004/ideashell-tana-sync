@@ -8,7 +8,7 @@ It is a native macOS menu-bar app: no Node.js, no Terminal, and no relay server.
 
 [Download the latest stable release](https://github.com/jiangsir-tech/ideashell-tana-sync/releases/latest) · macOS 14+ · Apple-signed and notarized · Universal for Apple Silicon and Intel
 
-![IdeaSync menu-bar panel showing daily status, manual or automatic sync, and quick actions](docs/images/menu-bar-overview.png)
+![IdeaSync menu-bar panel showing daily status, manual or automatic sync, and quick actions](docs/images/menu-bar-overview-en.png)
 
 ## What it does
 
@@ -19,7 +19,7 @@ It is a native macOS menu-bar app: no Node.js, no Terminal, and no relay server.
 - **Shows useful history:** view all-time, monthly, and 30-day discovered-versus-synced trends. History stores counts only, never note content.
 - **Chinese and English UI:** follows macOS or switches language instantly in Settings.
 
-![Sync history showing all-time, monthly, and recent 30-day trends](docs/images/sync-history.png)
+![Sync history showing all-time, monthly, and recent 30-day trends](docs/images/sync-history-en.png)
 
 ## Install in three steps
 
