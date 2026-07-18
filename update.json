@@ -1,9 +1,9 @@
 {
-  "version": "0.1.0",
-  "build": 7,
+  "version": "0.1.1",
+  "build": 8,
   "releaseNotes": {
-    "zh-Hans": "闪念同步首个正式版：已完成 Apple 签名与公证，支持直接安装，并提供图形化设置、定时同步、同步历史和更新提醒。",
-    "en": "The first stable release of IdeaSync: Apple-signed and notarized, with graphical setup, scheduled sync, sync history, and update checks."
+    "zh-Hans": "关于窗口现在只显示公开版本号；内部构建号继续用于可靠地检查更新。",
+    "en": "The About window now shows only the public version; the internal build number remains in use for reliable update checks."
   },
-  "downloadURL": "https://github.com/jiangsir-tech/ideashell-tana-sync/releases/tag/v0.1.0"
+  "downloadURL": "https://github.com/jiangsir-tech/ideashell-tana-sync/releases/tag/v0.1.1"
 }
